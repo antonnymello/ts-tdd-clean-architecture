@@ -22,6 +22,7 @@
     "lint:fix": "eslint . --fix",
     "test": "jest --passWithNoTests --no-cache --runInBand",
     "test:watch": "npm test -- --watch",
+    "test:staged": "npm test -- --findRelatedTests",
     "test:coverage": "npm test -- --coverage"
   },
   "author": "",
