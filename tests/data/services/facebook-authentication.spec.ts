@@ -6,6 +6,7 @@ import { type LoadFacebookUserApi } from "@/data/contracts/apis";
 describe("FacebookAuthenticationService", () => {
   let loadFacebookUserApi: MockProxy<LoadFacebookUserApi>;
   let sut: FacebookAuthenticationService;
+  const token = "any_token";
 
   beforeEach(() => {
     loadFacebookUserApi = mock<LoadFacebookUserApi>();
@@ -13,10 +14,10 @@ describe("FacebookAuthenticationService", () => {
   });
 
   it("should call LoadFacebookUserAPI with correct params", async () => {
-    await sut.perform({ token: "any_token" });
+    await sut.perform({ token });
 
     expect(loadFacebookUserApi.loadUser).toHaveBeenCalledWith({
-      token: "any_token",
+      token,
     });
     expect(loadFacebookUserApi.loadUser).toHaveBeenCalledTimes(1);
   });
@@ -24,7 +25,7 @@ describe("FacebookAuthenticationService", () => {
   it("should return AuthenticationError when LoadFacebookUserApi returns undefined", async () => {
     loadFacebookUserApi.loadUser.mockResolvedValueOnce(undefined);
 
-    const authResult = await sut.perform({ token: "any_token" });
+    const authResult = await sut.perform({ token });
 
     expect(authResult).toEqual(new AuthenticationError());
   });
