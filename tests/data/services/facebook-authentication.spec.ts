@@ -4,9 +4,10 @@ import { FacebookAuthenticationService } from "@/data/services";
 import { type LoadFacebookUserApi } from "@/data/contracts/apis";
 
 describe("FacebookAuthenticationService", () => {
+  const token = "any_token";
+
   let loadFacebookUserApi: MockProxy<LoadFacebookUserApi>;
   let sut: FacebookAuthenticationService;
-  const token = "any_token";
 
   beforeEach(() => {
     loadFacebookUserApi = mock<LoadFacebookUserApi>();
