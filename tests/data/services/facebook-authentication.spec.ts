@@ -2,13 +2,17 @@ import { mock, type MockProxy } from "jest-mock-extended";
 import { AuthenticationError } from "@/domain/errors";
 import { FacebookAuthenticationService } from "@/data/services";
 import { type LoadFacebookUserApi } from "@/data/contracts/apis";
-import { type LoadUserAccountRepository } from "@/data/contracts/repositories";
+import {
+  type CreateFacebookAccountRepository,
+  type LoadUserAccountRepository,
+} from "@/data/contracts/repositories";
 
 describe("FacebookAuthenticationService", () => {
   const token = "any_token";
 
   let loadFacebookUserApi: MockProxy<LoadFacebookUserApi>;
   let loadUserAccountRepository: MockProxy<LoadUserAccountRepository>;
+  let createFacebookAccountRepository: MockProxy<CreateFacebookAccountRepository>;
   let sut: FacebookAuthenticationService;
 
   beforeEach(() => {
@@ -21,10 +25,12 @@ describe("FacebookAuthenticationService", () => {
     });
 
     loadUserAccountRepository = mock();
+    createFacebookAccountRepository = mock();
 
     sut = new FacebookAuthenticationService(
       loadFacebookUserApi,
-      loadUserAccountRepository
+      loadUserAccountRepository,
+      createFacebookAccountRepository
     );
   });
 
@@ -52,5 +58,23 @@ describe("FacebookAuthenticationService", () => {
       email: "any_email",
     });
     expect(loadUserAccountRepository.load).toHaveBeenCalledTimes(1);
+  });
+
+  it("should call createFacebookAccountRepository when LoadFacebookUserApi returns undefined", async () => {
+    loadUserAccountRepository.load.mockResolvedValueOnce(undefined);
+
+    await sut.perform({ token });
+
+    expect(
+      createFacebookAccountRepository.createFromFacebook
+    ).toHaveBeenCalledWith({
+      facebookId: "any_facebook_id",
+      name: "any_name",
+      email: "any_email",
+    });
+
+    expect(
+      createFacebookAccountRepository.createFromFacebook
+    ).toHaveBeenCalledTimes(1);
   });
 });
