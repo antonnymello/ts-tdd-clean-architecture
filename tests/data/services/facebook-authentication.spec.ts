@@ -10,18 +10,17 @@ import {
 } from "@/data/contracts/repositories";
 
 describe("FacebookAuthenticationService", () => {
-  const token = "any_token";
-
   let facebookApi: MockProxy<LoadFacebookUserApi>;
   let crypto: MockProxy<TokenGenerator>;
   let userAccountRepository: MockProxy<
     LoadUserAccountRepository & SaveFacebookAccountRepository
   >;
   let sut: FacebookAuthenticationService;
+  let token: string;
 
-  beforeEach(() => {
+  beforeAll(() => {
+    token = "any_token";
     facebookApi = mock<LoadFacebookUserApi>();
-
     facebookApi.loadUser.mockResolvedValue({
       name: "any_facebook_name",
       email: "any_facebook_email",
@@ -33,8 +32,12 @@ describe("FacebookAuthenticationService", () => {
     userAccountRepository.saveWithFacebook.mockResolvedValue({
       id: "any_account_id",
     });
+
     crypto = mock();
     crypto.generateToken.mockResolvedValue("any_generated_token");
+  });
+
+  beforeEach(() => {
     sut = new FacebookAuthenticationService(
       facebookApi,
       userAccountRepository,
