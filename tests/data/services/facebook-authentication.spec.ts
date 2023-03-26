@@ -8,8 +8,6 @@ import {
 } from "@/data/contracts/repositories";
 import { FacebookAccount } from "@/domain/models";
 
-jest.mock("@/domain/models/facebook-account");
-
 describe("FacebookAuthenticationService", () => {
   const token = "any_token";
 
@@ -59,18 +57,11 @@ describe("FacebookAuthenticationService", () => {
     expect(userAccountRepository.load).toHaveBeenCalledTimes(1);
   });
 
-  it("shoud call SaveFacebookAccountRepository with Facebook Account", async () => {
-    const FacebookAccountStub = jest
-      .fn()
-      .mockImplementation(() => ({ any: "any" }));
-
-    jest.mocked(FacebookAccount).mockImplementation(FacebookAccountStub);
-
+  it("should call SaveFacebookAccountRepository with Facebook Account", async () => {
     await sut.perform({ token });
 
-    expect(userAccountRepository.saveWithFacebook).toHaveBeenCalledWith({
-      any: "any",
-    });
-    expect(userAccountRepository.saveWithFacebook).toHaveBeenCalledTimes(1);
+    expect(userAccountRepository.saveWithFacebook).toHaveBeenCalledWith(
+      expect.any(FacebookAccount)
+    );
   });
 });
