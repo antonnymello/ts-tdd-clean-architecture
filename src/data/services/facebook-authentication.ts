@@ -1,7 +1,7 @@
 import { AuthenticationError } from "@/domain/errors";
 import { type FacebookAuthentication } from "@/domain/features";
 import { type LoadFacebookUserApi } from "@/data/contracts/apis";
-import { FacebookAccount } from "@/domain/models";
+import { AccessToken, FacebookAccount } from "@/domain/models";
 import { type TokenGenerator } from "@/data/contracts/crypto";
 import {
   type LoadUserAccountRepository,
@@ -33,7 +33,10 @@ export class FacebookAuthenticationService {
       facebookAccount
     );
 
-    await this.crypto.generateToken({ key: id });
+    await this.crypto.generateToken({
+      key: id,
+      expirationInMs: AccessToken.expirationInMs,
+    });
 
     return new AuthenticationError();
   }
