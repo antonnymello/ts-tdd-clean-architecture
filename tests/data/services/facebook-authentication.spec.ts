@@ -6,6 +6,9 @@ import {
   type LoadUserAccountRepository,
   type SaveFacebookAccountRepository,
 } from "@/data/contracts/repositories";
+import { FacebookAccount } from "@/domain/models";
+
+jest.mock("@/domain/models/facebook-account");
 
 describe("FacebookAuthenticationService", () => {
   const token = "any_token";
@@ -56,50 +59,18 @@ describe("FacebookAuthenticationService", () => {
     expect(userAccountRepository.load).toHaveBeenCalledTimes(1);
   });
 
-  it("should create account with facebook data", async () => {
-    await sut.perform({ token });
+  it("shoud call SaveFacebookAccountRepository with Facebook Account", async () => {
+    const FacebookAccountStub = jest
+      .fn()
+      .mockImplementation(() => ({ any: "any" }));
 
-    expect(userAccountRepository.saveWithFacebook).toHaveBeenCalledWith({
-      facebookId: "any_facebook_id",
-      name: "any_facebook_name",
-      email: "any_facebook_email",
-    });
-
-    expect(userAccountRepository.saveWithFacebook).toHaveBeenCalledTimes(1);
-  });
-
-  it("should not update account name", async () => {
-    userAccountRepository.load.mockResolvedValueOnce({
-      id: "any_id",
-      name: "any_name",
-    });
+    jest.mocked(FacebookAccount).mockImplementation(FacebookAccountStub);
 
     await sut.perform({ token });
 
     expect(userAccountRepository.saveWithFacebook).toHaveBeenCalledWith({
-      id: "any_id",
-      name: "any_name",
-      email: "any_facebook_email",
-      facebookId: "any_facebook_id",
+      any: "any",
     });
-
-    expect(userAccountRepository.saveWithFacebook).toHaveBeenCalledTimes(1);
-  });
-
-  it("should update account name", async () => {
-    userAccountRepository.load.mockResolvedValueOnce({
-      id: "any_id",
-    });
-
-    await sut.perform({ token });
-
-    expect(userAccountRepository.saveWithFacebook).toHaveBeenCalledWith({
-      id: "any_id",
-      name: "any_facebook_name",
-      email: "any_facebook_email",
-      facebookId: "any_facebook_id",
-    });
-
     expect(userAccountRepository.saveWithFacebook).toHaveBeenCalledTimes(1);
   });
 });
