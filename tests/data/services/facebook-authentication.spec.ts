@@ -129,4 +129,12 @@ describe("FacebookAuthenticationService", () => {
 
     await expect(promise).rejects.toThrow(new Error("token_error"));
   });
+
+  it("should throw AuthenticationError if crypto returns undefined", async () => {
+    crypto.generateToken.mockResolvedValueOnce(undefined);
+
+    const authResult = await sut.perform({ token });
+
+    expect(authResult).toEqual(new AuthenticationError());
+  });
 });
