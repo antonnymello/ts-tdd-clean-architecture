@@ -131,7 +131,7 @@ describe("FacebookAuthenticationService", () => {
   });
 
   it("should return AuthenticationError if crypto returns undefined", async () => {
-    crypto.generateToken.mockResolvedValueOnce(undefined);
+    crypto.generateToken.mockResolvedValueOnce(undefined as any);
 
     const authResult = await sut.perform({ token });
 
