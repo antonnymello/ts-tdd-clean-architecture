@@ -38,8 +38,6 @@ export class FacebookAuthenticationService implements FacebookAuthentication {
       expirationInMs: AccessToken.expirationInMs,
     });
 
-    if (token === undefined) return new AuthenticationError();
-
     return new AccessToken(token);
   }
 }
