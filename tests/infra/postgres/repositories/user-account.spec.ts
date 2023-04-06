@@ -45,15 +45,15 @@ describe("PostgresUserAccountRepository", () => {
 
   describe("saveWithFacebook", () => {
     it("should create a new account if id is undefined", async () => {
-      await sut.saveWithFacebook({
+      const accountData = {
         email: "any_email",
         name: "any_name",
         facebookId: "any_facebook_id",
-      });
+      };
 
-      const user = await postgresUserRepository.findOne({
-        email: "any_email",
-      });
+      await sut.saveWithFacebook(accountData);
+
+      const user = await postgresUserRepository.findOne({ email: "any_email" });
 
       expect(user?.id).toBe(1);
     });
