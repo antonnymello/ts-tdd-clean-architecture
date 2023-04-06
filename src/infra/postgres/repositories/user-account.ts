@@ -7,7 +7,7 @@ import {
 } from "@/data/contracts/repositories";
 
 export class PostgresUserAccountRepository
-  implements LoadUserAccountRepository
+  implements LoadUserAccountRepository, SaveFacebookAccountRepository
 {
   private readonly postgresUserRepository = getRepository(PostgresUser);
 
