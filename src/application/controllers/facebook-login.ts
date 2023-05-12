@@ -4,6 +4,7 @@ import {
   unauthorized,
   type HttpResponse,
   serverError,
+  ok,
 } from "@/application/helpers";
 import { AccessToken } from "@/domain/models";
 import { RequiredFieldError, ServerError } from "@/application/errors";
@@ -28,10 +29,7 @@ export class FacebookLoginController {
       });
 
       if (accessToken instanceof AccessToken) {
-        return {
-          statusCode: 200,
-          data: { accessToken: accessToken.value },
-        };
+        return ok({ accessToken: accessToken.value });
       }
 
       return unauthorized();
