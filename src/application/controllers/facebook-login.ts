@@ -1,5 +1,9 @@
 import { type FacebookAuthentication } from "@/domain/features";
-import { badRequest, type HttpResponse } from "@/application/helpers";
+import {
+  badRequest,
+  unauthorized,
+  type HttpResponse,
+} from "@/application/helpers";
 import { AccessToken } from "@/domain/models";
 import { RequiredFieldError, ServerError } from "@/application/errors";
 
@@ -29,10 +33,7 @@ export class FacebookLoginController {
         };
       }
 
-      return {
-        statusCode: 401,
-        data: accessToken,
-      };
+      return unauthorized();
     } catch (err: unknown) {
       const error = err as Error;
 
