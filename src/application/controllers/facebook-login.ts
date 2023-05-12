@@ -3,6 +3,7 @@ import {
   badRequest,
   unauthorized,
   type HttpResponse,
+  serverError,
 } from "@/application/helpers";
 import { AccessToken } from "@/domain/models";
 import { RequiredFieldError, ServerError } from "@/application/errors";
@@ -36,11 +37,7 @@ export class FacebookLoginController {
       return unauthorized();
     } catch (err: unknown) {
       const error = err as Error;
-
-      return {
-        statusCode: 500,
-        data: new ServerError(error),
-      };
+      return serverError(new ServerError(error));
     }
   }
 }
