@@ -4,17 +4,18 @@ import { type FacebookAuthentication } from "@/domain/features";
 import { AuthenticationError } from "@/domain/errors";
 import { AccessToken } from "@/domain/models";
 import { FacebookLoginController } from "@/application/controllers";
-import {
-  RequiredFieldError,
-  ServerError,
-  UnauthorizedError,
-} from "@/application/errors";
+import { RequiredStringValidator } from "@/application/validation";
+import { ServerError, UnauthorizedError } from "@/application/errors";
+
+jest.mock("@/application/validation/required-string");
 
 describe("FacebookLoginController", () => {
   let sut: FacebookLoginController;
   let facebookAuthentication: MockProxy<FacebookAuthentication>;
+  let token: string;
 
   beforeAll(() => {
+    token = "any_token";
     facebookAuthentication = mock();
     facebookAuthentication.perform.mockResolvedValue(
       new AccessToken("ANY_VALUE")
@@ -25,38 +26,34 @@ describe("FacebookLoginController", () => {
     sut = new FacebookLoginController(facebookAuthentication);
   });
 
-  it("should return 400 if token is empty", async () => {
-    const httpResponse = await sut.handle({ token: "" });
+  it("should return 400 if validation fails", async () => {
+    const error = new Error("validation_error");
 
+    const RequiredStringValidatorSpy = jest.fn().mockImplementationOnce(() => ({
+      validate: jest.fn().mockReturnValueOnce(error),
+    }));
+
+    jest
+      .mocked(RequiredStringValidator)
+      .mockImplementationOnce(RequiredStringValidatorSpy);
+
+    const httpResponse = await sut.handle({ token });
+
+    expect(RequiredStringValidatorSpy).toHaveBeenCalledWith(
+      "any_token",
+      "token"
+    );
     expect(httpResponse).toEqual({
       statusCode: 400,
-      data: new RequiredFieldError("token"),
-    });
-  });
-
-  it("should return 400 if token is null", async () => {
-    const httpResponse = await sut.handle({ token: null as any });
-
-    expect(httpResponse).toEqual({
-      statusCode: 400,
-      data: new RequiredFieldError("token"),
-    });
-  });
-
-  it("should return 400 if token is undefined", async () => {
-    const httpResponse = await sut.handle({ token: undefined as any });
-
-    expect(httpResponse).toEqual({
-      statusCode: 400,
-      data: new RequiredFieldError("token"),
+      data: error,
     });
   });
 
   it("should call FacebookAuthentication with correct params", async () => {
-    await sut.handle({ token: "ANY_TOKEN" });
+    await sut.handle({ token });
 
     expect(facebookAuthentication.perform).toHaveBeenCalledWith({
-      token: "ANY_TOKEN",
+      token,
     });
     expect(facebookAuthentication.perform).toHaveBeenCalledTimes(1);
   });
@@ -65,7 +62,7 @@ describe("FacebookLoginController", () => {
     facebookAuthentication.perform.mockResolvedValueOnce(
       new AuthenticationError()
     );
-    const httpResponse = await sut.handle({ token: "ANY_TOKEN" });
+    const httpResponse = await sut.handle({ token });
 
     expect(httpResponse).toEqual({
       statusCode: 401,
@@ -74,7 +71,7 @@ describe("FacebookLoginController", () => {
   });
 
   it("should return 200 if authentication succeeds", async () => {
-    const httpResponse = await sut.handle({ token: "ANY_TOKEN" });
+    const httpResponse = await sut.handle({ token });
 
     expect(httpResponse).toEqual({
       statusCode: 200,
@@ -85,7 +82,7 @@ describe("FacebookLoginController", () => {
   it("should return 500 if authentication throws", async () => {
     const error = new Error("INFRA_ERROR");
     facebookAuthentication.perform.mockRejectedValueOnce(error);
-    const httpResponse = await sut.handle({ token: "ANY_TOKEN" });
+    const httpResponse = await sut.handle({ token });
 
     expect(httpResponse).toEqual({
       statusCode: 500,
