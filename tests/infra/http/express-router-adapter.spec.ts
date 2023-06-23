@@ -1,50 +1,53 @@
-import type { Request, Response } from "express";
+/* eslint-disable @typescript-eslint/no-confusing-void-expression */
+/* eslint-disable @typescript-eslint/await-thenable */
+import type { NextFunction, Request, RequestHandler, Response } from "express";
 import { getMockReq, getMockRes } from "@jest-mock/express";
 import { type MockProxy, mock } from "jest-mock-extended";
 
 import { type Controller } from "@/application/controllers";
-import { ExpressRouterAdapter } from "@/infra/http/";
+import { adaptExpressRoute } from "@/infra/http/";
 
 describe("ExpressRouterAdapter", () => {
-  let request: Request;
-  let response: Response;
+  let req: Request;
+  let res: Response;
+  let next: NextFunction;
   let controller: MockProxy<Controller>;
-  let sut: ExpressRouterAdapter;
+  let sut: RequestHandler;
 
   beforeEach(() => {
-    request = getMockReq({ body: { any: "any" } });
-    response = getMockRes().res;
+    req = getMockReq({ body: { any: "any" } });
+    res = getMockRes().res;
     controller = mock();
     controller.handle.mockResolvedValue({
       statusCode: 200,
       data: { data: "any_data" },
     });
-    sut = new ExpressRouterAdapter(controller);
+    sut = adaptExpressRoute(controller);
   });
 
-  it("should call handle with correct request", async () => {
-    await sut.adapt(request, response);
+  it("should call handle with correct req", async () => {
+    await sut(req, res, next);
 
     expect(controller.handle).toHaveBeenCalledWith({ any: "any" });
     expect(controller.handle).toHaveBeenCalledTimes(1);
   });
 
-  it("should call handle with empty request", async () => {
-    const request = getMockReq();
+  it("should call handle with empty req", async () => {
+    const req = getMockReq();
 
-    await sut.adapt(request, response);
+    await sut(req, res, next);
 
     expect(controller.handle).toHaveBeenCalledWith({});
     expect(controller.handle).toHaveBeenCalledTimes(1);
   });
 
   it("should respond with http status 200 and valid data", async () => {
-    await sut.adapt(request, response);
+    await sut(req, res, next);
 
-    expect(response.status).toHaveBeenCalledWith(200);
-    expect(response.status).toHaveBeenCalledTimes(1);
-    expect(response.json).toHaveBeenCalledWith({ data: "any_data" });
-    expect(response.json).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.status).toHaveBeenCalledTimes(1);
+    expect(res.json).toHaveBeenCalledWith({ data: "any_data" });
+    expect(res.json).toHaveBeenCalledTimes(1);
   });
 
   it("should respond with http status 500 and valid error ", async () => {
@@ -53,11 +56,11 @@ describe("ExpressRouterAdapter", () => {
       data: new Error("any_error"),
     });
 
-    await sut.adapt(request, response);
+    await sut(req, res, next);
 
-    expect(response.status).toHaveBeenCalledWith(500);
-    expect(response.status).toHaveBeenCalledTimes(1);
-    expect(response.json).toHaveBeenCalledWith({ error: "any_error" });
-    expect(response.json).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.status).toHaveBeenCalledTimes(1);
+    expect(res.json).toHaveBeenCalledWith({ error: "any_error" });
+    expect(res.json).toHaveBeenCalledTimes(1);
   });
 });
