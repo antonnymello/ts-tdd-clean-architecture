@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { getMockReq, getMockRes } from "@jest-mock/express";
-import { mock } from "jest-mock-extended";
+import { type MockProxy, mock } from "jest-mock-extended";
 import { type Controller } from "@/application/controllers";
 
 class ExpressRouterAdapter {
@@ -12,12 +12,19 @@ class ExpressRouterAdapter {
 }
 
 describe("ExpressRouterAdapter", () => {
-  it("should call handle with correct request", async () => {
-    const request = getMockReq({ body: { any: "any" } });
-    const { res: response } = getMockRes();
-    const controller = mock<Controller>();
-    const sut = new ExpressRouterAdapter(controller);
+  let request: Request;
+  let response: Response;
+  let controller: MockProxy<Controller>;
+  let sut: ExpressRouterAdapter;
 
+  beforeEach(() => {
+    request = getMockReq({ body: { any: "any" } });
+    response = getMockRes().res;
+    controller = mock();
+    sut = new ExpressRouterAdapter(controller);
+  });
+
+  it("should call handle with correct request", async () => {
     await sut.adapt(request, response);
 
     expect(controller.handle).toHaveBeenCalledWith({ any: "any" });
@@ -25,9 +32,6 @@ describe("ExpressRouterAdapter", () => {
 
   it("should call handle with empty request", async () => {
     const request = getMockReq();
-    const { res: response } = getMockRes();
-    const controller = mock<Controller>();
-    const sut = new ExpressRouterAdapter(controller);
 
     await sut.adapt(request, response);
 
