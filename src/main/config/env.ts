@@ -4,5 +4,6 @@ export const env = {
     clientSecret:
       process.env.FB_CLIENT_SECRET ?? "610f747c8e36c15fefc857d11a2c6ca4",
   },
+  jwtSecret: process.env.JWT_SECRET ?? "any_secret",
   appPort: process.env.PORT ?? 8080,
 };
