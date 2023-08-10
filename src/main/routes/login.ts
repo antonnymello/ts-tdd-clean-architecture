@@ -3,7 +3,7 @@ import { makeFacebookLoginController } from "@/main/factories/controllers";
 import { type Router } from "express";
 
 const setupRoutes = (router: Router): void => {
-  router.post("/api/login/facebook", adapt(makeFacebookLoginController()));
+  router.post("/login/facebook", adapt(makeFacebookLoginController()));
 };
 
 export default setupRoutes;
