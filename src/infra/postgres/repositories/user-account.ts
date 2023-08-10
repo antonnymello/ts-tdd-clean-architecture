@@ -11,11 +11,11 @@ export class PostgresUserAccountRepository
 {
   private readonly postgresUserRepository = getRepository(PostgresUser);
 
-  async load(
-    params: LoadUserAccountRepository.Params
-  ): Promise<LoadUserAccountRepository.Result> {
+  async load({
+    email,
+  }: LoadUserAccountRepository.Params): Promise<LoadUserAccountRepository.Result> {
     const postgresUser = await this.postgresUserRepository.findOne({
-      email: params.email,
+      email,
     });
 
     if (postgresUser === undefined) return;
@@ -26,22 +26,25 @@ export class PostgresUserAccountRepository
     };
   }
 
-  async saveWithFacebook(
-    params: SaveFacebookAccountRepository.Params
-  ): Promise<SaveFacebookAccountRepository.Result> {
-    if (params.id !== undefined) {
+  async saveWithFacebook({
+    id,
+    name,
+    email,
+    facebookId,
+  }: SaveFacebookAccountRepository.Params): Promise<SaveFacebookAccountRepository.Result> {
+    if (id !== undefined) {
       await this.postgresUserRepository.update(
-        { id: Number(params.id) },
-        { name: params.name, facebookId: params.facebookId }
+        { id: Number(id) },
+        { name, facebookId }
       );
 
-      return { id: params.id };
+      return { id };
     }
 
     const user = await this.postgresUserRepository.save({
-      email: params.email,
-      name: params.name,
-      facebookId: params.facebookId,
+      email,
+      name,
+      facebookId,
     });
 
     return { id: String(user.id) };
